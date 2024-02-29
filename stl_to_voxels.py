@@ -2,7 +2,7 @@ import json
 import numpy as np
 from stl import mesh
 from matplotlib import pyplot as plt
-
+import pickle as pkl
 
 # Save BPs here:
 # /mnt/c/Users/garet/OneDrive/Documents/From The Depths/Player Profiles/Morjor/Constructables/Testing/GENERATED_BLUEPRINT.blueprint
@@ -17,14 +17,15 @@ def printJsonRecursive(fooDict, level):
 			printJsonRecursive(fooDict[foo], level+1)
 		else:
 			print(f"{foo}:{fooDict[foo]}")
-printJsonRecursive(blueprint, 0)
+printJsonRecursive(blueprint['Blueprint'], 0)
+
 
 
 # Using an existing stl file:
-hull_mesh = mesh.Mesh.from_file('LowPolyBenchy.stl')
-# hull_mesh = mesh.Mesh.from_file('squareHull.stl')
-# hull_mesh = mesh.Mesh.from_file('hull.stl')
-# hull_mesh = mesh.Mesh.from_file('cube.stl')
+# hull_mesh = mesh.Mesh.from_file('input/LowPolyBenchy.stl')
+# hull_mesh = mesh.Mesh.from_file('input/squareHull.stl')
+hull_mesh = mesh.Mesh.from_file('input/hull.stl')
+# hull_mesh = mesh.Mesh.from_file('input/cube.stl')
 print(f"\n\n\n\n")
 # print(.shape)
 xyz = np.concatenate([hull_mesh.points[:, 3*ii:3*(ii+1)] for ii in range(3)])
@@ -36,12 +37,12 @@ wallThickness = 4.5
 sizeMargin = 10
 
 xyz[:, 0] += sizeMargin - np.floor(np.min(xyz[:, 0]))
-xyz[:, 1] += sizeMargin - np.floor(np.min(xyz[:, 1]))
+xyz[:, 1] -= (np.max(xyz[:, 1]) + np.min(xyz[:, 1]))/2
 xyz[:, 2] += sizeMargin - np.floor(np.min(xyz[:, 2]))
 
 
 hull_mesh.points[:, 0::3] += sizeMargin - np.floor(np.min(hull_mesh.points[:, 0::3]))
-hull_mesh.points[:, 1::3] += sizeMargin - np.floor(np.min(hull_mesh.points[:, 1::3]))
+hull_mesh.points[:, 1::3] -= (np.max(hull_mesh.points[:, 1::3]) + np.min(hull_mesh.points[:, 1::3]))/2
 hull_mesh.points[:, 2::3] += sizeMargin - np.floor(np.min(hull_mesh.points[:, 2::3]))
 
 
@@ -78,6 +79,8 @@ for fooPt in hull_mesh.points:
 	x1, y1, z1 = p1
 	x2, y2, z2 = p2
 	
+	if x0 < 0 and x1 < 0 and x2 < 0:
+		continue
 
 	# ux, uy, uz = u = [x1-x0, y1-y0, z1-z0]
 	# vx, vy, vz = v = [x2-x0, y2-y0, z2-z0]
@@ -142,6 +145,7 @@ for fooPt in hull_mesh.points:
 			# print(f"planeDist:{planeDist}")
 			continue
 
+
 		closestPt = fooPt - planeDist*normalVect
 		
 		# # Check that closest point is inside triangle
@@ -194,13 +198,22 @@ for fooPt in hull_mesh.points:
 
 
 
+shape = outputPoints.shape
+mirrorPts = np.zeros((shape[0]*2, shape[1], shape[2]), dtype=np.int16)
 
+setPoints = np.where(outputPoints == 1)[0]
+setPoints[0] += shape[0]
+mirrorPts[setPoints] = 1
 
-
+# setPoints[0] = shape[0]*2 - setPoints[0]
+# mirrorPts[setPoints] = 1
 
 outPts = []
 
-for fooPt in np.swapaxes(np.array(np.where(outputPoints == 1)), 1, 0):
+print(f"outputPoints:{np.sum(outputPoints)}/{outputPoints.shape[0]*outputPoints.shape[1]*outputPoints.shape[2]}")
+print(f"mirrorPts:{np.sum(mirrorPts)}/{mirrorPts.shape[0]*mirrorPts.shape[1]*mirrorPts.shape[2]}")
+
+for fooPt in np.swapaxes(np.array(np.where(mirrorPts == 1)), 1, 0):
 	blockIDS.append(565)
 	# blockPlacements.append(f"{xx},{yy},{zz}")
 	blockPlacements.append(f"{fooPt[1]},{fooPt[2]},{fooPt[0]}")
@@ -216,6 +229,8 @@ blueprint['Blueprint']['BLP'] = blockPlacements
 blueprint['Blueprint']['BLR'] = blockRotations
 blueprint['Blueprint']['BCI'] = blockColors
 json.dump(blueprint, open('GENERATED_BLUEPRINT.blueprint', 'w'))
+
+pkl.dump(outputPoints, open(f"output/voxel.pkl", 'wb'))
 
 # ax = plt.figure().add_subplot(projection='3d')
 # ax.set_xlabel('X')
