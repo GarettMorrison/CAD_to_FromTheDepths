@@ -4,11 +4,8 @@ from stl import mesh
 from matplotlib import pyplot as plt
 import pickle as pkl
 
-# Save BPs here:
-# /mnt/c/Users/garet/OneDrive/Documents/From The Depths/Player Profiles/Morjor/Constructables/Testing/GENERATED_BLUEPRINT.blueprint
-
 # Load example blueprint
-blueprint = json.load(open('ExampleVehicles/DIFF_LENS_2X.blueprint', 'r'))
+blueprint = json.load(open('ExampleVehicles/SINGLE_BLOCK_TEST.blueprint', 'r'))
 def printJsonRecursive(fooDict, level):
 	for foo in fooDict:
 		for ii in range(level): print('   ', end='')
@@ -19,15 +16,11 @@ def printJsonRecursive(fooDict, level):
 			print(f"{foo}:{fooDict[foo]}")
 printJsonRecursive(blueprint['Blueprint'], 0)
 
-
+FILE_NAME = 'hull'
 
 # Using an existing stl file:
-# hull_mesh = mesh.Mesh.from_file('input/LowPolyBenchy.stl')
-# hull_mesh = mesh.Mesh.from_file('input/squareHull.stl')
-hull_mesh = mesh.Mesh.from_file('input/hull.stl')
-# hull_mesh = mesh.Mesh.from_file('input/cube.stl')
-print(f"\n\n\n\n")
-# print(.shape)
+hull_mesh = mesh.Mesh.from_file(f'input/{FILE_NAME}.stl')
+
 xyz = np.concatenate([hull_mesh.points[:, 3*ii:3*(ii+1)] for ii in range(3)])
 
 print(hull_mesh.points.shape)
@@ -106,7 +99,7 @@ for fooPt in hull_mesh.points:
 
 	# continue
 
-		
+
 	# ax = plt.figure().add_subplot(projection='3d')
 	# ax.set_xlabel('X')
 	# ax.set_ylabel('Y')
@@ -223,14 +216,19 @@ for fooPt in np.swapaxes(np.array(np.where(mirrorPts == 1)), 1, 0):
 
 
 
+if not os.path.isdir('output'):
+	os.makedirs('output')
+
+pkl.dump(outputPoints, open(f"processing/{FILE_NAME}_vox.pkl", 'wb'))
+pkl.dump(mirrorPts, open(f"processing/{FILE_NAME}_voxMirrored.pkl", 'wb'))
 
 blueprint['Blueprint']['BlockIDS'] = blockIDS
 blueprint['Blueprint']['BLP'] = blockPlacements
 blueprint['Blueprint']['BLR'] = blockRotations
 blueprint['Blueprint']['BCI'] = blockColors
-json.dump(blueprint, open('GENERATED_BLUEPRINT.blueprint', 'w'))
 
-pkl.dump(outputPoints, open(f"output/voxel.pkl", 'wb'))
+json.dump(blueprint, open(f"output/{FILE_NAME}_cubes.blueprint", 'w'))
+
 
 # ax = plt.figure().add_subplot(projection='3d')
 # ax.set_xlabel('X')
