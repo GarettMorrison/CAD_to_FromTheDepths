@@ -20,7 +20,7 @@ def printJsonRecursive(fooDict, level=0):
 
 
 # Generate blueprint that has every example block placed
-blockIDs = json.load(open('block_ids.json', 'r'))
+blockIDs = json.load(open('constants/block_ids.json', 'r'))
 
 # beam 4m : 47 : 1404
 
@@ -120,6 +120,8 @@ blueprint['Blueprint']['BLR'] = blockRotations
 blueprint['Blueprint']['BCI'] = blockColors
 blueprint['ItemDictionary'] = ItemDictionary
 
+print(ItemDictionary)
+
 # blueprint['Blueprint']['designChanged'] = True
 blueprint['Blueprint']['BlockCount'] = len(blockPlacements)
 blueprint['Name'] = 'TEST_BLOCKS'
@@ -140,7 +142,7 @@ blockColors = []
 
 ItemDictionary = {
 	"499": "e63040c9-0027-4fd3-be30-67fe3e950140",
-	"1436": "40659614-1b34-497a-b745-78497e4b2025",
+	"1436": "c5550009-2b37-41ff-a788-d413b39376ae",
 }
 
 # Place a bunch of Metal triangle corner (left) (2m) to indicate rotation

@@ -3,6 +3,7 @@ import numpy as np
 from stl import mesh
 from matplotlib import pyplot as plt
 import pickle as pkl
+import os
 
 # Load example blueprint
 blueprint = json.load(open('ExampleVehicles/SINGLE_BLOCK_TEST.blueprint', 'r'))
@@ -17,6 +18,8 @@ def printJsonRecursive(fooDict, level):
 printJsonRecursive(blueprint['Blueprint'], 0)
 
 FILE_NAME = 'hull'
+FILE_NAME = 'cube'
+FILE_NAME = 'ball'
 
 # Using an existing stl file:
 hull_mesh = mesh.Mesh.from_file(f'input/{FILE_NAME}.stl')
@@ -218,6 +221,9 @@ for fooPt in np.swapaxes(np.array(np.where(mirrorPts == 1)), 1, 0):
 
 if not os.path.isdir('output'):
 	os.makedirs('output')
+	
+if not os.path.isdir('processing'):
+	os.makedirs('processing')
 
 pkl.dump(outputPoints, open(f"processing/{FILE_NAME}_vox.pkl", 'wb'))
 pkl.dump(mirrorPts, open(f"processing/{FILE_NAME}_voxMirrored.pkl", 'wb'))
