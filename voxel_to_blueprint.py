@@ -10,6 +10,10 @@ MAKE_SCATTER_PLOT = False
 
 FILE_NAME = 'hull'
 # FILE_NAME = 'cube'
+# FILE_NAME = 'ball'
+# FILE_NAME = '3DBenchy'
+
+IS_MIRROR = True
 
 # Load example blueprint
 blueprint = json.load(open('ExampleVehicles/SINGLE_BLOCK_TEST.blueprint', 'r'))
@@ -76,16 +80,18 @@ for fooBlock in vertices:
 outputPoints = pkl.load(open(f"processing/{FILE_NAME}_vox.pkl", 'rb'))
 
 
+if IS_MIRROR:
+	mirrorPts = outputPoints
+else:
+	# Mirror points
+	shape = outputPoints.shape
+	mirrorPts = np.zeros((shape[0], 2*shape[1], shape[2]), dtype=np.int16)
 
-# Mirror points
-shape = outputPoints.shape
-mirrorPts = np.zeros((shape[0], 2*shape[1], shape[2]), dtype=np.int16)
-
-setPoints = np.array(np.where(outputPoints == 1))
-setPoints[1] += shape[1]
-mirrorPts[*setPoints] = 1
-setPoints[1] = 2*shape[1] - setPoints[1]
-mirrorPts[*setPoints] = 1
+	setPoints = np.array(np.where(outputPoints == 1))
+	setPoints[1] += shape[1]
+	mirrorPts[*setPoints] = 1
+	setPoints[1] = 2*shape[1] - setPoints[1]
+	mirrorPts[*setPoints] = 1
 
 
 # # Apply a little voxel smoothing
